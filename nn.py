@@ -12,18 +12,12 @@ neurons = [numpy.zeros((1, 3)), numpy.zeros((1, 4)), numpy.zeros((1, 3)), numpy.
 # neurons[2] = hidden2
 # neurons[3] = output
 
-weights = [numpy.zeros((3, 4)), numpy.zeros((4, 3)), numpy.zeros((3, 3))]
+#intialize weights randomly
+weights = [numpy.random.uniform(low=-0.316, high=0.316, size=(3, 4)), numpy.random.uniform(low=-0.316, high=0.316, size=(4, 3)), numpy.random.uniform(low=-0.316, high=0.316, size=(3, 3))]
 biases = [0, 0, 0]
 
-#intialize weights randomly
+
 random.seed()
-#Weight range - [-b, b] where b = 1 / sqrt(Nin + Nhidden)
-#weights[array index][row][column]
-for i in range(len(weights)):
-    for j in range(len(weights[i])):
-        for k in range(len(weights[i][j])):
-            weights[i][j][k] = random.uniform(-0.316, 0.316)
-            # print(weights[i])
 
 #sigmoid function
 def sigmoid(x):
@@ -55,7 +49,12 @@ def train():
     neurons[0] = numpy.array([[rN, bN, gN]])
     feedforward()
 
-    #output-h2 backprop
+    # #output-h2 backprop
+    # for i in range(len(weights)):
+    #     if (i == len(weights) - 1): #last weight
+    #         weightDer = 
+    #         weights[len(weights) - i]
+
 
 
 
