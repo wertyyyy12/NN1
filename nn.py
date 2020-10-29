@@ -45,11 +45,9 @@ def train():
 
     #output-h2 backprop
     output = neurons[-1]
-    scalarDerivatives = ((output * (1 - output)) * (output - complementaryColor))[0]
-    print(neurons)
-    print(scalarDerivatives)
+    scalarDerivatives = (output * (1 - output)) * (output - complementaryColor)
     scaledWeights = []
-    for i in range(len(scalarDerivatives)):
+    for i in range(len(scalarDerivatives[0])):
         lastLayerWeights = weights[-1]
         splitWeights = numpy.split(numpy.transpose(lastLayerWeights), 3)
         print("Weights: ")
@@ -61,10 +59,10 @@ def train():
         print(scalarDerivatives[0])
         print("")
         print(splitWeights[i])
-        print(scalarDerivatives[i])
+        print(scalarDerivatives[0][i])
 
-        print(splitWeights[i].dot(scalarDerivatives[i])[0])
-        scaledWeights.append(splitWeights[i].dot(scalarDerivatives[i])[0])
+        print(splitWeights[i].dot(scalarDerivatives[0][i])[0])
+        scaledWeights.append(splitWeights[i].dot(scalarDerivatives[0][i])[0])
     print("S0: ")
     print(scaledWeights)
     print(numpy.array(scaledWeights))
