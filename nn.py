@@ -1,5 +1,3 @@
-import math
-import random
 import numpy
 
 #[[input]    [hidden]  [hidden]  [output]]
@@ -17,13 +15,12 @@ weights = [numpy.random.uniform(low=-0.316, high=0.316, size=(3, 4)), numpy.rand
 biases = [0, 0, 0]
 
 
-random.seed()
-
 #sigmoid function
 def sigmoid(x):
     return 1 / (1 + numpy.exp(-x))
       
 def feedforward():
+    print("Neurons: ")
     for i in range(len(neurons)):
         if i != 0:
             #W = sigmoid(weighted sum + bias)
@@ -31,29 +28,53 @@ def feedforward():
 
         print(neurons[i])
 
+    print(" ")
+
 
 def train():
     #feed a random input 
-
-        #initialize random r g b values
-    r = random.randrange(0, 255, 1)
-    b = random.randrange(0, 255, 1)
-    g = random.randrange(0, 255, 1)
-
-        #convert the 0-255 values to 0-1 values
-    rN = numpy.interp(r, [0, 255], [0, 1])
-    bN = numpy.interp(b, [0, 255], [0, 1])
-    gN = numpy.interp(g, [0, 255], [0, 1])
-
-        #set input neurons to the 0-1 values of the random colors
-    neurons[0] = numpy.array([[rN, bN, gN]])
+    neurons[0] = numpy.interp(numpy.random.uniform(high=255, size=(1, 3)), [0, 255], [0, 1])
+    
     feedforward()
+    #find target values for given input (complimentary color, for simplicity)
+        #takes neurons 0-1 values
+        #converts to 0-255 values (using interp)
+        #subtracts these from the white color: (255, 255, 255) - (output1, output2, output3)
+        #converts this new difference into a 0-1 value again (interp)
+    complementaryColor = numpy.interp(numpy.array([[255, 255, 255]]) - numpy.interp(neurons[0], [0, 1], [0, 255]), [0, 255], [0, 1])
 
-    # #output-h2 backprop
-    # for i in range(len(weights)):
-    #     if (i == len(weights) - 1): #last weight
-    #         weightDer = 
-    #         weights[len(weights) - i]
+    #output-h2 backprop
+    output = neurons[-1]
+    scalarDerivatives = ((output * (1 - output)) * (output - complementaryColor))[0]
+    print(neurons)
+    print(scalarDerivatives)
+    scaledWeights = []
+    for i in range(len(scalarDerivatives)):
+        lastLayerWeights = weights[-1]
+        splitWeights = numpy.split(numpy.transpose(lastLayerWeights), 3)
+        print("Weights: ")
+        print(lastLayerWeights)
+        print("")
+        #dy/dx = w * Oi * (1 - Oi) * (Oi - Yi)
+        #          | --------- Scalars -------|
+        print("Scalars: ")
+        print(scalarDerivatives[0])
+        print("")
+        print(splitWeights[i])
+        print(scalarDerivatives[i])
+
+        print(splitWeights[i].dot(scalarDerivatives[i])[0])
+        scaledWeights.append(splitWeights[i].dot(scalarDerivatives[i])[0])
+    print("S0: ")
+    print(scaledWeights)
+    print(numpy.array(scaledWeights))
+    print(numpy.transpose(numpy.array(scaledWeights)))
+    print(numpy.array(scaledWeights).shape)
+    # print("")
+    # print(numpy.array(scaledWeights))
+    # print(numpy.array(scaledWeights).shape)
+    # print(numpy.array(scaledWeights).reshape(3, 3))
+        # for i in range(len(scalarDerivatives[0])):
 
 
 
