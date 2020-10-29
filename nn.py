@@ -12,8 +12,9 @@ neurons = [numpy.zeros((1, 3)), numpy.zeros((1, 4)), numpy.zeros((1, 3)), numpy.
 
 #intialize weights randomly
 weights = [numpy.random.uniform(low=-0.316, high=0.316, size=(3, 4)), numpy.random.uniform(low=-0.316, high=0.316, size=(4, 3)), numpy.random.uniform(low=-0.316, high=0.316, size=(3, 3))]
-gradients = [[], [], []]
-biases = [0, 0, 0]
+weightGradients = [[], [], []]
+biasGradients = [[], [], []]
+biases = [numpy.zeros((1, 4)), numpy.zeros((1, 3)), numpy.zeros((1, 3))]
 
 
 #sigmoid function
@@ -39,7 +40,6 @@ def gradientAvg(gradientCollection):
         #cumulative sum of matrices for the gradient collection
         sum = sum + gradientCollection[i]
     finalAvg = sum / gradientCollectionLength
-    print(gradientCollectionLength)
     return finalAvg
 
 def train(learningRate, epochs, batchSize):
@@ -58,9 +58,11 @@ def train(learningRate, epochs, batchSize):
 
         #output-h2 backprop
         output = neurons[-1][0]
-        # the * operator for 
+        # the * operator for matrices is a 1 to 1 multiplication, only matching elements are multiplied
+        # same with subtraction 
         scalarDerivatives = (output * (1 - output)) * (output - complementaryColor)
-        #scaledWeights contains the derivative for every weight in a matrix
+
+        #scaledWeights contains the derivative for every weight, in a matrix
         scaledWeights = []
         for i in range(len(scalarDerivatives)):
             lastLayerWeights = weights[-1]
@@ -70,31 +72,34 @@ def train(learningRate, epochs, batchSize):
             scaledWeights.append(splitWeights[i].dot(scalarDerivatives[i])[0])
         scaledWeights = numpy.transpose(numpy.array(scaledWeights))
 
-        #set weights to new values using gradiant descent but on a matrix scale
-        gradients[0].append(scaledWeights)
+        #set weights to new values using gradient descent but on a matrix scale
+        weightGradients[-1].append(scaledWeights)
         # print(batchSize)
         # print(len(gradients[0]))
-        if (batchSize == len(gradients[0])):
-            outputH2gradientAvg = gradientAvg(gradients[0])
+        if (batchSize == len(weightGradients[-1])):
+            #avg of gradients calculated so far
+            outputH2gradientAvg = gradientAvg(weightGradients[-1])
             weights[-1] = weights[-1] - (learningRate * outputH2gradientAvg)
-            gradients[0] = []
+
+            #clear the gradient "queue"
+            weightGradients[-1] = []
+        
+        #bias gradient is same as weight gradient but without multiplying by any weight (just 1)
+        #dy/dx = 1 * Oi * (1 - Oi) * (Oi - Yi)
+        #          | --------- Scalars -------|
+        #                   (from before!)
+
+        biasGradients[-1].append(numpy.array(scalarDerivatives))
+
+        if (batchSize == len(biasGradients[-1])):
+            #avg of gradients calculated so far
+            outputH2bias_gAvg = gradientAvg(biasGradients[-1])
+            biases[-1] = biases[-1] - (learningRate * outputH2bias_gAvg)
+
+            #clear the gradient "queue"
+            biasGradients[-1] = []
             
-
-
-
-
-
-            #take avg of gradients calculated so far
-            # print(gradientAvg(gradients[0]))
-        # print(weights[-1])
-
-
-        # print("")
-        # print(numpy.array(scaledWeights))
-        # print(numpy.array(scaledWeights).shape)
-        # print(numpy.array(scaledWeights).reshape(3, 3))
-            # for i in range(len(scalarDerivatives[0])):
-
+        
 
 
 
