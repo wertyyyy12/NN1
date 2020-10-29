@@ -12,6 +12,7 @@ neurons = [numpy.zeros((1, 3)), numpy.zeros((1, 4)), numpy.zeros((1, 3)), numpy.
 
 #intialize weights randomly
 weights = [numpy.random.uniform(low=-0.316, high=0.316, size=(3, 4)), numpy.random.uniform(low=-0.316, high=0.316, size=(4, 3)), numpy.random.uniform(low=-0.316, high=0.316, size=(3, 3))]
+gradients = [[], [], []]
 biases = [0, 0, 0]
 
 
@@ -30,50 +31,71 @@ def feedforward():
 
     print(" ")
 
+#gradientCollection = collection of matrices with weight gradients
+def gradientAvg(gradientCollection):
+    sum = 0
+    gradientCollectionLength = len(gradientCollection)
+    for i in range(gradientCollectionLength):
+        #cumulative sum of matrices for the gradient collection
+        sum = sum + gradientCollection[i]
+    finalAvg = sum / gradientCollectionLength
+    print(gradientCollectionLength)
+    return finalAvg
 
-def train(learningRate):
-    #feed a random input 
-    neurons[0] = numpy.interp(numpy.random.uniform(high=255, size=(1, 3)), [0, 255], [0, 1])
-    
-    feedforward()
-    #find target values for given input (complimentary color, for simplicity)
-        #takes neurons 0-1 values
-        #converts to 0-255 values (using interp)
-        #subtracts these from the white color: (255, 255, 255) - (output1, output2, output3)
-        #converts this new difference into a 0-1 value again (interp)
-        #strips an array layer caused by using [[]] arrays the whole time (with [0] at the end)
-    complementaryColor = numpy.interp(numpy.array([[255, 255, 255]]) - numpy.interp(neurons[0], [0, 1], [0, 255]), [0, 255], [0, 1])[0]
+def train(learningRate, epochs, batchSize):
+    for _ in range(epochs):
+        #feed a random input 
+        neurons[0] = numpy.interp(numpy.random.uniform(high=255, size=(1, 3)), [0, 255], [0, 1])
+        
+        feedforward()
+        #find target values for given input (complimentary color, for simplicity)
+            #takes neurons 0-1 values
+            #converts to 0-255 values (using interp)
+            #subtracts these from the white color: (255, 255, 255) - (output1, output2, output3)
+            #converts this new difference into a 0-1 value again (interp)
+            #strips an array layer caused by using [[]] arrays the whole time (with [0] at the end)
+        complementaryColor = numpy.interp(numpy.array([[255, 255, 255]]) - numpy.interp(neurons[0], [0, 1], [0, 255]), [0, 255], [0, 1])[0]
 
-    #output-h2 backprop
-    output = neurons[-1][0]
-    # the * operator for 
-    scalarDerivatives = (output * (1 - output)) * (output - complementaryColor)
-    #scaledWeights contains the derivative for every weight in a matrix
-    scaledWeights = []
-    for i in range(len(scalarDerivatives)):
-        lastLayerWeights = weights[-1]
-        print("Weights: ")
-        print(lastLayerWeights)
-        splitWeights = numpy.split(numpy.transpose(lastLayerWeights), 3)
-        #dy/dx = w * Oi * (1 - Oi) * (Oi - Yi)
-        #          | --------- Scalars -------|
-        scaledWeights.append(splitWeights[i].dot(scalarDerivatives[i])[0])
-    scaledWeights = numpy.transpose(numpy.array(scaledWeights))
-    print(scaledWeights)
-    print(scaledWeights.shape)
+        #output-h2 backprop
+        output = neurons[-1][0]
+        # the * operator for 
+        scalarDerivatives = (output * (1 - output)) * (output - complementaryColor)
+        #scaledWeights contains the derivative for every weight in a matrix
+        scaledWeights = []
+        for i in range(len(scalarDerivatives)):
+            lastLayerWeights = weights[-1]
+            splitWeights = numpy.split(numpy.transpose(lastLayerWeights), 3)
+            #dy/dx = w * Oi * (1 - Oi) * (Oi - Yi)
+            #          | --------- Scalars -------|
+            scaledWeights.append(splitWeights[i].dot(scalarDerivatives[i])[0])
+        scaledWeights = numpy.transpose(numpy.array(scaledWeights))
 
-    #set weights to new values using gradiant descent but on a matrix scale
-    weights[-1] = weights[-1] - (learningRate * scaledWeights)
-    print(weights[-1])
-
-
-    # print("")
-    # print(numpy.array(scaledWeights))
-    # print(numpy.array(scaledWeights).shape)
-    # print(numpy.array(scaledWeights).reshape(3, 3))
-        # for i in range(len(scalarDerivatives[0])):
+        #set weights to new values using gradiant descent but on a matrix scale
+        gradients[0].append(scaledWeights)
+        # print(batchSize)
+        # print(len(gradients[0]))
+        if (batchSize == len(gradients[0])):
+            outputH2gradientAvg = gradientAvg(gradients[0])
+            weights[-1] = weights[-1] - (learningRate * outputH2gradientAvg)
+            gradients[0] = []
+            
 
 
 
 
-train(0.5)
+
+            #take avg of gradients calculated so far
+            # print(gradientAvg(gradients[0]))
+        # print(weights[-1])
+
+
+        # print("")
+        # print(numpy.array(scaledWeights))
+        # print(numpy.array(scaledWeights).shape)
+        # print(numpy.array(scaledWeights).reshape(3, 3))
+            # for i in range(len(scalarDerivatives[0])):
+
+
+
+
+train(0.5, 10, 2)
